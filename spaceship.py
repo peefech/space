@@ -20,7 +20,9 @@ class SpaceShip:
         self.explosion = 1
         self.explosion_time = None
 
-    def control(self, pressed_keys):
+        self.sheet = False
+
+    def control(self, pressed_keys, reload_bust):
         """
         Управление кораблем и стрельбой
         """
@@ -34,7 +36,7 @@ class SpaceShip:
             self.direction = 1
 
         if pressed_keys[pygame.K_SPACE] or pressed_keys[pygame.K_UP]:
-            if time.time() - self.last_shot > SHOT_DELAY:
+            if time.time() - self.last_shot > SHOT_DELAY / reload_bust:
                 self.last_shot = time.time()
                 shoot = True
 

@@ -83,10 +83,11 @@ class AlienShot(pygame.sprite.Sprite):
         if self.corner.colliderect(spaceship.corner) and spaceship.destruct_start_time is None:
             if self.destruct_start_time is None:
                 self.init_destruction()
-                self.player_explosion_sound.play()
-                scoreboard.remove_life()
-                spaceship.remove_life()
-                return True
+                if not spaceship.sheet:
+                    self.player_explosion_sound.play()
+                    scoreboard.remove_life()
+                    spaceship.remove_life()
+                    return True
         return False
 
     def init_destruction(self, explosion_sprite=ALIEN_SHOT_EXPLOSION):

@@ -13,18 +13,15 @@ class Scoreboard:
         self.font = pygame.font.SysFont("Consolas", 25, bold=False)
 
         self.green_line = []
-        self.build_hud_line()
 
     def load_hi_score(self):
         """
         Загрузка hi-score
         """
-        try:
-            with open(HI_SCORE_PATH, "r") as file:
-                data = json.load(file)
-            self.hi_score = data["hi-score"]
-        except:
-            print("No hi-score found")
+
+        with open(HI_SCORE_PATH, "r") as file:
+            data = json.load(file)
+        self.hi_score = data["hi-score"]
 
     def write_hi_score(self):
         """

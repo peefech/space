@@ -9,6 +9,7 @@ from random import choice
 from boss import Boss
 from alien_shot import AlienShot
 from shot import Shot
+from bonus import Bonus
 
 
 class Game:
@@ -101,6 +102,8 @@ class Game:
 
         alien_shots = pygame.sprite.Group()
 
+        bonuses = pygame.sprite.Group()
+
         fleet_group = []
 
         alien_count = create_alien_fleet(fleet_group)
@@ -121,9 +124,14 @@ class Game:
         i = 0
         life_icon = pygame.image.load(SPACESHIP_PATH).convert_alpha()
         life_icon.set_colorkey(BLACK, pygame.RLEACCEL)
+        bonus_icon = pygame.image.load(BONUS_ICON).convert_alpha()
+        bonus_icon.set_colorkey(BLACK, pygame.RLEACCEL)
+
         out_of_screen = False
         turned_counter = 0
         out_of_bounds = False
+
+        scoreboard.build_hud_line()
 
         while game_on:
             for event in pygame.event.get():
@@ -138,17 +146,24 @@ class Game:
             for shot in shots:
                 if shot.destruct_start_time is None:
                     shot.move()
-                    hit = shot.collision_detect(fleet_group, alien_shots, boss_group, scoreboard)
+                    hit = shot.collision_detect(fleet_group, alien_shots, boss_group, scoreboard, bonuses, spaceship)
 
                     if hit:
                         alien_count -= 1
                 else:
                     shot.update_destroyed()
 
-            pressed_keys = pygame.key.get_pressed()
+            speed = False
+            reload = 1
 
-            if spaceship.destruct_start_time is None and spaceship.control(pressed_keys):
-                shots.add(Shot(position=spaceship.corner))
+            for bonus in bonuses:
+                if bonus is not None:
+                    speed = bonus.speed_bust
+                    reload = bonus.reload_bust
+
+            pressed_keys = pygame.key.get_pressed()
+            if spaceship.destruct_start_time is None and spaceship.control(pressed_keys, reload):
+                shots.add(Shot(spaceship.corner, speed))
 
             if spaceship.destruct_start_time is not None:
                 spaceship.update_destroyed()
@@ -264,7 +279,15 @@ class Game:
                         boss.move()
                         boss.out_of_screen()
                     else:
-                        boss.update_destroyed()
+                        boss_time = time.time()
+                        if boss.update_destroyed():
+                            bonuses.add(Bonus(boss.corner.center))
+
+            for bonus in bonuses:
+                if bonus is not None:
+                    if spaceship.sheet:
+                        bonus.update_sheet(spaceship)
+                    bonus.update(spaceship)
 
             # Рендер
 
@@ -286,6 +309,13 @@ class Game:
 
             for shot in alien_shots:
                 screen.blit(shot.surface, shot.corner)
+
+            for bonus in bonuses:
+                if not bonus.active:
+                    screen.blit(bonus.surface, bonus.corner)
+                else:
+                    bonus_corner = bonus_icon.get_rect(center=(70, SCREEN_HEIGHT - 35))
+                    screen.blit(bonus_icon, bonus_corner)
 
             write_on_screen(f"SCORE<1>", "white", [50, 30], screen, self.font)
             write_on_screen(f"HI-SCORE", "white", [350, 30], screen, self.font)

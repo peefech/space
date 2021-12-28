@@ -1,4 +1,5 @@
 import pygame
+from functions import *
 from config import *
 
 
@@ -6,7 +7,7 @@ class Shot(pygame.sprite.Sprite):
     pygame.mixer.init()
     shoot_sound = pygame.mixer.Sound(SHOOT_SOUND)
 
-    def __init__(self, position, shot_width=3, shot_height=20, shot_color=WHITE):
+    def __init__(self, position, speed_bust, shot_width=3, shot_height=20, shot_color=WHITE):
         super().__init__()
         self.surface = pygame.Surface((shot_width, shot_height))
         self.surface.fill(shot_color)
@@ -14,7 +15,7 @@ class Shot(pygame.sprite.Sprite):
         self.corner = self.surface.get_rect(center=(position[0] + SPACESHIP_WIDTH / 2, position[1]))
         self.direction_x = 0
         self.direction_y = -1
-        self.speed = SHOT_SPEED
+        self.speed = shot_speed(speed_bust)
         self.destruct_start_time = None
         self.shoot_sound.play()
 
@@ -24,7 +25,7 @@ class Shot(pygame.sprite.Sprite):
         """
         self.corner.move_ip(self.direction_x * self.speed, self.direction_y * self.speed)
 
-    def collision_detect(self, fleet_group, alien_shots, boss_group, scoreboard):
+    def collision_detect(self, fleet_group, alien_shots, boss_group, scoreboard, bonuses, spaceship):
         """
         Проверка коллизии с разными типами и вызовы методов
         """
@@ -32,6 +33,7 @@ class Shot(pygame.sprite.Sprite):
 
         self.alien_shot_collision(alien_shots)
         self.boss_collision(boss_group, scoreboard)
+        self.bonus_collision(bonuses, spaceship)
         self.out_of_screen()
 
         return hit
@@ -82,6 +84,16 @@ class Shot(pygame.sprite.Sprite):
                         boss.init_destruction()
                         scoreboard.increase(boss)
                         self.kill()
+
+    def bonus_collision(self, bonuses, spaceship):
+        """
+        Проверка коллизии с боссом
+        """
+        for bonus in bonuses:
+            if bonus is not None:
+                if self.corner.colliderect(bonus.corner):
+                    bonus.activate(spaceship)
+                    self.kill()
 
     def out_of_screen(self):
         """

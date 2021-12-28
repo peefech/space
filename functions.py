@@ -90,5 +90,12 @@ def picture_score(screen):
     aliens_icon.append(alien_icon_10)
 
     for j in range(4):
-        life_corner = aliens_icon[j].get_rect(center=(340, 515 + j*80))
+        life_corner = aliens_icon[j].get_rect(center=(340, 515 + j * 80))
         screen.blit(aliens_icon[j], life_corner)
+
+
+def shot_speed(speed_bust):
+    if speed_bust:
+        return SHOT_SPEED * 2
+    else:
+        return SHOT_SPEED

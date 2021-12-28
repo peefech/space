@@ -51,9 +51,10 @@ class Boss(pygame.sprite.Sprite):
                 (pygame.time.get_ticks() - self.destruct_start_time >= BOSS_DESTRUCTION_TIME):
             self.destroy()
             return True
+
         elif self.destruct_start_time and \
                 (pygame.time.get_ticks() - self.destruct_start_time >= BOSS_DESTRUCTION_TIME // 3):
-            self.surface = pygame.image.load(ALIEN_BOSS_EXPLOSIONS[1]).convert_alpha()
+            self.surface = pygame.image.load(ALIEN_BOSS_EXPLOSIONS[1]).convert_alpha().convert_alpha()
             self.surface.set_colorkey(BLACK, pygame.RLEACCEL)
 
     def init_destruction(self):
@@ -73,3 +74,4 @@ class Boss(pygame.sprite.Sprite):
         """
         self.destruct_start_time = None
         self.kill()
+
